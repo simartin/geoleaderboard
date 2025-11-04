@@ -26,12 +26,36 @@ document.addEventListener('DOMContentLoaded', () => {
         sortOrder[header] = true; // true -> ascending, false -> descending
     });
 
+    async function fetchAndDecompress(url) {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            const compressedStream = response.body;
+
+            const decompression = new DecompressionStream("gzip");
+
+            const decompressedStream = compressedStream.pipeThrough(decompression);
+
+            const reader = decompressedStream.getReader();
+            const decoder = new TextDecoder(); // assumes UTF‑8 text output
+            let result = '';
+
+            while (true) {
+                    const {value, done} = await reader.read();
+                    if (done) break;
+                    result += decoder.decode(value, {stream: true});
+            }
+            // Flush any remaining decoded characters
+            result += decoder.decode();
+
+            return result;
+    }
+
     function loadAllRecords() {
         if (loading) return;
         loading = true;
     
-        fetch('https://media.githubusercontent.com/media/Matt-OP/geoleaderboard/refs/heads/main/leaderboard.csv')
-            .then(response => response.text())
+        fetchAndDecompress('https://media.githubusercontent.com/media/simartin/geoleaderboard/refs/heads/gzip_csv/leaderboard.csv.gz')
             .then(data => {
                 Papa.parse(data, {
                     header: true,

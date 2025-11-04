@@ -1,2 +1,4 @@
 *.png filter=lfs diff=lfs merge=lfs -text
 *.csv filter=lfs diff=lfs merge=lfs -text
+leaderboard.csv.zip filter=lfs diff=lfs merge=lfs -text
+leaderboard.csv.gz filter=lfs diff=lfs merge=lfs -text
